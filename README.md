@@ -27,8 +27,9 @@ You'll also need to adjust the `blocked-tip` to the same message as when you ent
 
 The default message is `"Unknown command. Type "/help" for help."`.  
 If this is the message that your server is displaying an unknown command. You don't need to change it.  
-If the returned message states `"Unknown or incomplete command"`. 
-The following message is configured to achieve the same effect:
+
+If the returned message states `"Unknown or incomplete command ..."`. 
+The following message is configured to implement the same effect:
 
 ```hocon
 blocked-tip=[
@@ -40,13 +41,14 @@ blocked-tip=[
 By default, BlockerVelocity doesn't apply any groups for players.  
 What group is applied to a player depends on the permissions the player has. (`blocker.group.<group>`)
 
-To bypass the group. They should not be assigned that permission. 
-Or add `blocker.bypass.<group>` permissions. (Also applies if you have  `*` permission.)
+If you want to bypass the group.
+You shouldn't assign permissions to the group.
+Or add `blocker.bypass.<group>` permission.
 
-If you have `blocker.command` permissions. 
-You can then use the `/blockervelocity` command to reload the configuration file.
+If you have `blocker.command` permission. 
+You can then use the `/blockervelocity` command to reload the config.
 
-Wait for you to configure everything. Then enjoy it.
+Finish config and then enjoy it.
 
 ## Special thanks
 
