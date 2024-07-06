@@ -1,0 +1,77 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'java'
+    id 'eclipse'
+    id "org.jetbrains.gradle.plugin.idea-ext" version "1.0.1"
+}
+
+group = 'net.miaomoe'
+version = '1.0'
+def velocityVersion = "3.3.0-SNAPSHOT"
+
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
+    mavenLocal()
+    maven {
+        name = "papermc-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+    maven { url = "https://repo.jonesdev.xyz/releases/" } // Thanks jones repo for velocity-proxy
+}
+
+dependencies {
+    compileOnly("com.velocitypowered:velocity-api:$velocityVersion")
+    annotationProcessor("com.velocitypowered:velocity-api:$velocityVersion")
+    compileOnly("com.velocitypowered:velocity-proxy:$velocityVersion")
+    testCompileOnly("com.velocitypowered:velocity-proxy:$velocityVersion")
+    compileOnly("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
+    implementation("net.miaomoe.blessing:config:0.0.1")
+    implementation("com.typesafe:config:1.4.3")
+    compileOnly("io.netty:netty-all:4.1.109.Final")
+}
+
+def targetJavaVersion = 17
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
+}
+
+def templateSource = file('src/main/templates')
+def templateDest = layout.buildDirectory.dir('generated/sources/templates')
+def generateTemplates = tasks.register('generateTemplates', Copy) { task ->
+    def props = [
+            'version': project.version
+    ]
+    task.inputs.properties props
+
+    task.from templateSource
+    task.into templateDest
+    task.expand props
+}
+
+tasks.named('shadowJar', ShadowJar) {
+    enableRelocation true
+    relocate("net.miaomoe.blessing.config", "net.miaomoe.blocker.config.blessing")
+    relocate("com.typesafe.config", "net.miaomoe.blocker.config.typesafe")
+}
+
+sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
+
+rootProject.idea.project.settings.taskTriggers.afterSync generateTemplates
+project.eclipse.synchronizationTasks(generateTemplates)
