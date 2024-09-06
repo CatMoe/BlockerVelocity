@@ -24,7 +24,7 @@ public class PacketInboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof TabCompleteRequestPacket packet) {
+        if (msg instanceof TabCompleteRequestPacket packet && packet.getCommand().startsWith("/")) {
             if (plugin.getRootConfig().cancel(player, packet.getCommand(), true)) {
                 final TabCompleteResponsePacket response = new TabCompleteResponsePacket();
                 response.setTransactionId(packet.getTransactionId());
@@ -42,5 +42,9 @@ public class PacketInboundHandler extends ChannelInboundHandlerAdapter {
         super.channelRead(ctx, msg);
     }
 
-
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        if (plugin.getRootConfig().isDebug()) cause.printStackTrace();
+        super.exceptionCaught(ctx, cause);
+    }
 }
