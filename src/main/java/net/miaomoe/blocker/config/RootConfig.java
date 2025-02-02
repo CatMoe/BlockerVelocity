@@ -77,7 +77,11 @@ public final class RootConfig extends AbstractConfig {
     ) {
         @NotNull String message = (value == null ? "" : value).toLowerCase(Locale.ROOT);
         if (message.contains("/")) message=message.replaceFirst("/", "");
-        if (message.contains(" ")) message=message.split(" ")[0];
+        if (message.contains(" ")) {
+            final String[] split = message.split(" ");
+            if (split.length == 0) return false;
+            message = split[0];
+        }
         if (message.contains(":")) {
             final String[] split = message.split(":");
             if (split.length >= 2) {
