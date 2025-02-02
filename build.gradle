@@ -9,7 +9,7 @@ plugins {
 
 group = 'net.miaomoe'
 version = '1.0'
-def velocityVersion = "3.3.0-SNAPSHOT"
+def velocityVersion = "3.4.0-SNAPSHOT"
 
 repositories {
     gradlePluginPortal()
