@@ -1,7 +1,6 @@
 package net.miaomoe.blocker;
 
 import com.google.inject.Inject;
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -46,7 +45,10 @@ public final class BlockerVelocity {
     @Subscribe
     public void onProxyInitialization(final ProxyInitializeEvent event) {
         rootConfig = new RootConfig(this);
-        proxy.getCommandManager().register("blockervelocity", new MainCommand(this));
+        proxy.getCommandManager().register(
+                proxy.getCommandManager().metaBuilder("blockervelocity").build(),
+                new MainCommand(this)
+        );
         try {
             SimpleConfigUtil.saveAndRead(dataDirectory.toFile(), "config", rootConfig, ConfigType.HOCON);
             if (getRootConfig().isDebug()) {
@@ -57,7 +59,7 @@ public final class BlockerVelocity {
         }
     }
 
-    @Subscribe(order = PostOrder.FIRST)
+    @Subscribe(priority = 32766)
     public void onPlayerJoin(final PostLoginEvent event) {
         if (event.getPlayer() instanceof ConnectedPlayer player) {
             if (rootConfig.isDebug()) getLogger().info("Injecting Channel for player {}", player.getGameProfile().getName());
