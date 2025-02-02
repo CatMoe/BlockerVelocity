@@ -46,7 +46,11 @@ public class PacketOutboundHandler extends ChannelOutboundHandlerAdapter {
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if (msg instanceof MinecraftPacket) {
             if (msg instanceof TabCompleteResponsePacket packet) {
-                plugin.getRootConfig().removeBlocked(player, packet);
+                try {
+                    plugin.getRootConfig().removeBlocked(player, packet);
+                } catch (final Throwable e) {
+                    plugin.getLogger().warn("Failed to handle TabCompleteResponsePacket", e);
+                }
             } else if (msg instanceof AvailableCommandsPacket packet) {
                 if (CHILDREN_GETTER != null) {
                     try {

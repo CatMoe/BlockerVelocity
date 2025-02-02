@@ -24,20 +24,24 @@ public class PacketInboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof TabCompleteRequestPacket packet && packet.getCommand().startsWith("/")) {
-            if (plugin.getRootConfig().cancel(player, packet.getCommand(), true)) {
-                final TabCompleteResponsePacket response = new TabCompleteResponsePacket();
-                response.setTransactionId(packet.getTransactionId());
-                response.setStart(0);
-                response.setLength(0);
-                response.getOffers().clear();
-                player.getConnection().write(response);
-                return;
+        try {
+            if (msg instanceof TabCompleteRequestPacket packet && packet.getCommand().startsWith("/")) {
+                if (plugin.getRootConfig().cancel(player, packet.getCommand(), true)) {
+                    final TabCompleteResponsePacket response = new TabCompleteResponsePacket();
+                    response.setTransactionId(packet.getTransactionId());
+                    response.setStart(0);
+                    response.setLength(0);
+                    response.getOffers().clear();
+                    player.getConnection().write(response);
+                    return;
+                }
+            } else if (msg instanceof SessionPlayerCommandPacket packet) {
+                if (plugin.getRootConfig().cancel(player, packet.getCommand())) return;
+            } else if (msg instanceof LegacyChatPacket packet && packet.getMessage().startsWith("/")) {
+                if (plugin.getRootConfig().cancel(player, packet.getMessage())) return;
             }
-        } else if (msg instanceof SessionPlayerCommandPacket packet) {
-            if (plugin.getRootConfig().cancel(player, packet.getCommand())) return;
-        } else if (msg instanceof LegacyChatPacket packet && packet.getMessage().startsWith("/")) {
-            if (plugin.getRootConfig().cancel(player, packet.getMessage())) return;
+        } catch (Throwable t) {
+            plugin.getLogger().warn("Failed to handle packet {}", msg.getClass().getSimpleName(), t);
         }
         super.channelRead(ctx, msg);
     }
